@@ -1,0 +1,228 @@
+import { create } from "zustand";
+import type { CustomEndpoint, Language, OpponentProfile, ThemeId } from "../types";
+
+/** İlk açılışta gelen hazır personalar (Stockfish destekli — anahtarsız çalışır). */
+const BUILTIN_PROFILES: OpponentProfile[] = [
+  { id: "profile:builtin-1", name: "Acemi Aslı", emoji: "🐣", color: "#5ab46e", provider: "stockfish", model: "level-1", systemPrompt: "", rating: 1200, builtin: true },
+  { id: "profile:builtin-2", name: "Sabırlı Sami", emoji: "🧘", color: "#4d9fff", provider: "stockfish", model: "level-3", systemPrompt: "", rating: 1500, builtin: true },
+  { id: "profile:builtin-3", name: "Sert Sırrı", emoji: "😤", color: "#e0894a", provider: "stockfish", model: "level-5", systemPrompt: "", rating: 1900, builtin: true },
+  { id: "profile:builtin-4", name: "Stratejist Selin", emoji: "🦊", color: "#a855f7", provider: "stockfish", model: "level-6", systemPrompt: "", rating: 2200, builtin: true },
+  { id: "profile:builtin-5", name: "Usta Umut", emoji: "🎓", color: "#f4c14e", provider: "stockfish", model: "level-8", systemPrompt: "", rating: 2900, builtin: true },
+];
+
+export interface ApiKeys {
+  anthropic: string;
+  openai: string;
+  gemini: string;
+}
+
+export interface ClockConfig {
+  enabled: boolean;
+  initialMin: number;
+  incrementSec: number;
+}
+
+interface SettingsState {
+  nickname: string;
+  theme: ThemeId;
+  language: Language;
+  showHints: boolean;
+  soundEnabled: boolean;
+  apiKeys: ApiKeys;
+  ollamaBaseUrl: string;
+  customEndpoints: CustomEndpoint[];
+  profiles: OpponentProfile[];
+  profilesSeeded: boolean;
+  engineLevel: number;
+  analysisDepth: number;
+  clock: ClockConfig;
+  aiVsAiDelayMs: number;
+  loaded: boolean;
+
+  setNickname: (n: string) => void;
+  setTheme: (t: ThemeId) => void;
+  setLanguage: (l: Language) => void;
+  setShowHints: (v: boolean) => void;
+  setSoundEnabled: (v: boolean) => void;
+  setApiKey: (provider: keyof ApiKeys, key: string) => void;
+  setOllamaBaseUrl: (url: string) => void;
+  addCustomEndpoint: () => void;
+  updateCustomEndpoint: (id: string, patch: Partial<CustomEndpoint>) => void;
+  removeCustomEndpoint: (id: string) => void;
+  addProfile: () => string;
+  updateProfile: (id: string, patch: Partial<OpponentProfile>) => void;
+  removeProfile: (id: string) => void;
+  setEngineLevel: (l: number) => void;
+  setAnalysisDepth: (d: number) => void;
+  setClock: (c: Partial<ClockConfig>) => void;
+  setAiVsAiDelayMs: (ms: number) => void;
+  load: () => Promise<void>;
+}
+
+type Persisted = Omit<
+  SettingsState,
+  | "loaded"
+  | "setNickname" | "setTheme" | "setLanguage" | "setShowHints" | "setSoundEnabled"
+  | "setApiKey" | "setOllamaBaseUrl" | "addCustomEndpoint" | "updateCustomEndpoint"
+  | "removeCustomEndpoint" | "addProfile" | "updateProfile" | "removeProfile"
+  | "setEngineLevel" | "setAnalysisDepth" | "setClock"
+  | "setAiVsAiDelayMs" | "load"
+>;
+
+const DEFAULTS: Persisted = {
+  nickname: "",
+  theme: "classic",
+  language: "tr",
+  showHints: true,
+  soundEnabled: true,
+  apiKeys: { anthropic: "", openai: "", gemini: "" },
+  ollamaBaseUrl: "http://localhost:11434",
+  customEndpoints: [],
+  profiles: [],
+  profilesSeeded: false,
+  engineLevel: 3,
+  analysisDepth: 12,
+  clock: { enabled: false, initialMin: 5, incrementSec: 3 },
+  aiVsAiDelayMs: 800,
+};
+
+const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+function uuid(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx".replace(/x/g, () => ((Math.random() * 16) | 0).toString(16));
+}
+
+async function persistToDisk(data: Persisted): Promise<void> {
+  if (isTauri) {
+    const { load } = await import("@tauri-apps/plugin-store");
+    const store = await load("settings.json", { autoSave: false, defaults: {} });
+    await store.set("settings", data);
+    await store.save();
+  } else {
+    localStorage.setItem("settings", JSON.stringify(data));
+  }
+}
+
+async function readFromDisk(): Promise<Partial<Persisted>> {
+  try {
+    if (isTauri) {
+      const { load } = await import("@tauri-apps/plugin-store");
+      const store = await load("settings.json", { autoSave: false, defaults: {} });
+      return ((await store.get("settings")) as Persisted | undefined) ?? {};
+    }
+    return JSON.parse(localStorage.getItem("settings") ?? "{}");
+  } catch {
+    return {};
+  }
+}
+
+function applyBodyTheme(theme: ThemeId) {
+  document.body.dataset.theme = theme;
+}
+
+export const useSettingsStore = create<SettingsState>((set, get) => {
+  const persist = () => {
+    const s = get();
+    void persistToDisk({
+      nickname: s.nickname,
+      theme: s.theme,
+      language: s.language,
+      showHints: s.showHints,
+      soundEnabled: s.soundEnabled,
+      apiKeys: s.apiKeys,
+      ollamaBaseUrl: s.ollamaBaseUrl,
+      customEndpoints: s.customEndpoints,
+      profiles: s.profiles,
+      profilesSeeded: s.profilesSeeded,
+      engineLevel: s.engineLevel,
+      analysisDepth: s.analysisDepth,
+      clock: s.clock,
+      aiVsAiDelayMs: s.aiVsAiDelayMs,
+    });
+  };
+
+  return {
+    ...DEFAULTS,
+    loaded: false,
+
+    setNickname: (nickname) => { set({ nickname }); persist(); },
+    setTheme: (theme) => { applyBodyTheme(theme); set({ theme }); persist(); },
+    setLanguage: (language) => { set({ language }); persist(); },
+    setShowHints: (showHints) => { set({ showHints }); persist(); },
+    setSoundEnabled: (soundEnabled) => { set({ soundEnabled }); persist(); },
+    setApiKey: (provider, key) => {
+      set({ apiKeys: { ...get().apiKeys, [provider]: key.trim() } });
+      persist();
+    },
+    setOllamaBaseUrl: (url) => {
+      set({ ollamaBaseUrl: url.trim().replace(/\/+$/, "") });
+      persist();
+    },
+    addCustomEndpoint: () => {
+      const ep: CustomEndpoint = {
+        id: `custom:${uuid()}`,
+        name: "",
+        baseUrl: "",
+        apiKey: "",
+        models: "",
+      };
+      set({ customEndpoints: [...get().customEndpoints, ep] });
+      persist();
+    },
+    updateCustomEndpoint: (id, patch) => {
+      set({
+        customEndpoints: get().customEndpoints.map((e) =>
+          e.id === id ? { ...e, ...patch } : e,
+        ),
+      });
+      persist();
+    },
+    removeCustomEndpoint: (id) => {
+      set({ customEndpoints: get().customEndpoints.filter((e) => e.id !== id) });
+      persist();
+    },
+    addProfile: () => {
+      const id = `profile:${uuid()}`;
+      const ep: OpponentProfile = {
+        id, name: "", emoji: "🤖", color: "#4d9fff",
+        provider: "stockfish", model: "level-3", systemPrompt: "", rating: 1500,
+      };
+      set({ profiles: [...get().profiles, ep] });
+      persist();
+      return id;
+    },
+    updateProfile: (id, patch) => {
+      set({ profiles: get().profiles.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
+      persist();
+    },
+    removeProfile: (id) => {
+      set({ profiles: get().profiles.filter((p) => p.id !== id) });
+      persist();
+    },
+    setEngineLevel: (engineLevel) => { set({ engineLevel }); persist(); },
+    setAnalysisDepth: (analysisDepth) => { set({ analysisDepth }); persist(); },
+    setClock: (c) => { set({ clock: { ...get().clock, ...c } }); persist(); },
+    setAiVsAiDelayMs: (aiVsAiDelayMs) => { set({ aiVsAiDelayMs }); persist(); },
+
+    load: async () => {
+      const saved = await readFromDisk();
+      const merged: Persisted = {
+        ...DEFAULTS,
+        ...saved,
+        apiKeys: { ...DEFAULTS.apiKeys, ...(saved.apiKeys ?? {}) },
+        clock: { ...DEFAULTS.clock, ...(saved.clock ?? {}) },
+        customEndpoints: saved.customEndpoints ?? [],
+        profiles: saved.profiles ?? [],
+        profilesSeeded: saved.profilesSeeded ?? false,
+      };
+      // İlk açılışta hazır personaları bir kez ekle
+      if (!merged.profilesSeeded) {
+        merged.profiles = [...BUILTIN_PROFILES, ...merged.profiles];
+        merged.profilesSeeded = true;
+      }
+      applyBodyTheme(merged.theme);
+      set({ ...merged, loaded: true });
+    },
+  };
+});

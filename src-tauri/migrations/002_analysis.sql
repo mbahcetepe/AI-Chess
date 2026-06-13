@@ -1,0 +1,8 @@
+ALTER TABLE games ADD COLUMN white_name TEXT;
+ALTER TABLE games ADD COLUMN black_name TEXT;
+ALTER TABLE games ADD COLUMN opening TEXT;
+ALTER TABLE games ADD COLUMN white_accuracy REAL;
+ALTER TABLE games ADD COLUMN black_accuracy REAL;
+
+ALTER TABLE moves ADD COLUMN eval_cp INTEGER;
+ALTER TABLE moves ADD COLUMN quality TEXT;
