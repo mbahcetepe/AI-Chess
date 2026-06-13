@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { CustomEndpoint, Language, OpponentProfile, ThemeId } from "../types";
+import { getSecret, setSecret } from "../secrets";
 
 /** İlk açılışta gelen hazır personalar (Stockfish destekli — anahtarsız çalışır). */
 const BUILTIN_PROFILES: OpponentProfile[] = [
@@ -133,7 +134,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       language: s.language,
       showHints: s.showHints,
       soundEnabled: s.soundEnabled,
-      apiKeys: s.apiKeys,
+      // API anahtarları settings.json'a DÜZ METİN yazılmaz; DPAPI ile şifreli DB'de tutulur
+      apiKeys: { anthropic: "", openai: "", gemini: "" },
       ollamaBaseUrl: s.ollamaBaseUrl,
       customEndpoints: s.customEndpoints,
       profiles: s.profiles,
@@ -156,8 +158,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     setShowHints: (showHints) => { set({ showHints }); persist(); },
     setSoundEnabled: (soundEnabled) => { set({ soundEnabled }); persist(); },
     setApiKey: (provider, key) => {
-      set({ apiKeys: { ...get().apiKeys, [provider]: key.trim() } });
-      persist();
+      const trimmed = key.trim();
+      set({ apiKeys: { ...get().apiKeys, [provider]: trimmed } });
+      // Şifreli DB'ye yaz (settings.json'a değil)
+      void setSecret(`apikey:${provider}`, trimmed);
     },
     setOllamaBaseUrl: (url) => {
       set({ ollamaBaseUrl: url.trim().replace(/\/+$/, "") });
@@ -226,8 +230,27 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
         merged.profiles = [...BUILTIN_PROFILES, ...merged.profiles];
         merged.profilesSeeded = true;
       }
+
+      // --- API anahtarları: şifreli DB'den yükle + eski düz-metin anahtarları taşı ---
+      const legacy = saved.apiKeys ?? { anthropic: "", openai: "", gemini: "" };
+      let migrated = false;
+      const keys = { anthropic: "", openai: "", gemini: "" };
+      for (const p of ["anthropic", "openai", "gemini"] as const) {
+        let v = await getSecret(`apikey:${p}`);
+        // DB'de yoksa ama settings.json'da düz metin varsa → şifreli DB'ye taşı
+        if (!v && legacy[p]) {
+          v = legacy[p];
+          await setSecret(`apikey:${p}`, v);
+          migrated = true;
+        }
+        keys[p] = v;
+      }
+      merged.apiKeys = keys;
+
       applyBodyTheme(merged.theme);
       set({ ...merged, loaded: true });
+      // Düz-metin anahtarları settings.json'dan temizle (artık şifreli DB'de)
+      if (migrated) persist();
     },
   };
 });

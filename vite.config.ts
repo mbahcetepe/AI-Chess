@@ -12,6 +12,8 @@ export default defineConfig({
   build: {
     target: "chrome120",
     sourcemap: false,
+    // Katı CSP için inline modulepreload polyfill'i kapat (WebView2 native destekler)
+    modulePreload: { polyfill: false },
   },
   test: {
     environment: "node",

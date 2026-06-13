@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::time::Duration;
 use tauri_plugin_sql::{Builder as SqlBuilder, Migration, MigrationKind};
 
+mod secret;
+
 #[derive(serde::Serialize)]
 struct ProxyResp {
     status: u16,
@@ -58,6 +60,12 @@ pub fn run() {
             sql: include_str!("../migrations/002_analysis.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 3,
+            description: "encrypted secrets store",
+            sql: include_str!("../migrations/003_secrets.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
@@ -70,7 +78,11 @@ pub fn run() {
                 .add_migrations("sqlite:chess.db", migrations)
                 .build(),
         )
-        .invoke_handler(tauri::generate_handler![http_proxy])
+        .invoke_handler(tauri::generate_handler![
+            http_proxy,
+            secret::encrypt_secret,
+            secret::decrypt_secret
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

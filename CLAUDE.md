@@ -63,10 +63,14 @@ public/engine/               stockfish-18-lite-single.{js,wasm} (gömülü motor
 ## 🔑 Anahtarlar / Şifreler — ÖNEMLİ
 
 **API anahtarları KAYNAK KODA veya .env'e YAZILMAZ.** Kullanıcı bunları çalışma
-zamanında **Ayarlar → AI Sağlayıcıları**'ndan girer; şuraya kaydedilir:
-`%APPDATA%\com.murat.chess\settings.json` (tauri-plugin-store).
+zamanında **Ayarlar → AI Sağlayıcıları**'ndan girer.
 
-- Bu tasarım gereği güvenlidir: anahtarlar repoda durmaz, sızma riski yoktur.
+- **Şifreli saklama (v1.6+):** Anahtarlar **Windows DPAPI** ile şifrelenip SQLite
+  `secrets` tablosuna (hex) yazılır — `settings.json`'a DÜZ METİN YAZILMAZ. DPAPI,
+  anahtarı Windows kullanıcı hesabına bağlar (başka kullanıcı/işlem çözemez).
+  Rust: `src-tauri/src/secret.rs` (`encrypt_secret`/`decrypt_secret` komutları).
+  Frontend: `src/secrets.ts` (`getSecret`/`setSecret`). Eski düz-metin anahtarlar
+  ilk açılışta otomatik şifreli DB'ye taşınır ve settings.json'dan temizlenir.
 - `.env` repoya **commit edilmez** (`.gitignore`'da). `.env.example` yalnızca şablondur.
 - Ollama anahtar gerektirmez. Open WebUI/OpenRouter anahtarı custom uç nokta olarak girilir.
 

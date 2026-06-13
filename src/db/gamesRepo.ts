@@ -114,9 +114,12 @@ export async function listGames(filters: HistoryFilters = {}): Promise<GameSumma
   if (filters.mode) { where.push(`mode = $${i++}`); params.push(filters.mode); }
   if (filters.provider) { where.push(`(white_provider = $${i} OR black_provider = $${i})`); params.push(filters.provider); i++; }
   if (filters.result) { where.push(`result = $${i++}`); params.push(filters.result); }
+  // LIMIT/OFFSET'i kesinlikle tam sayıya zorla (SQL enjeksiyonuna karşı savunma)
+  const limit = Math.max(1, Math.min(10000, Math.trunc(Number(filters.limit) || 200)));
+  const offset = Math.max(0, Math.trunc(Number(filters.offset) || 0));
   const sql = `SELECT * FROM games
     ${where.length ? "WHERE " + where.join(" AND ") : ""}
-    ORDER BY started_at DESC LIMIT ${filters.limit ?? 200} OFFSET ${filters.offset ?? 0}`;
+    ORDER BY started_at DESC LIMIT ${limit} OFFSET ${offset}`;
   return db.select<GameSummary[]>(sql, params);
 }
 
