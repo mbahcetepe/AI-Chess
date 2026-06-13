@@ -15,22 +15,33 @@ function client(ctx: LlmContext): OpenAI {
   });
 }
 
+/** o1/o3/o4… "reasoning" modelleri — reasoning token bütçesi yer. */
+function isReasoning(model: string): boolean {
+  return /^o\d/i.test(model) || /gpt-5/i.test(model) || /reason/i.test(model);
+}
+
 async function chat(
   ctx: LlmContext,
   model: string,
   system: string,
   user: string,
   maxTokens: number,
+  effort?: "low" | "medium" | "high",
 ): Promise<string> {
   try {
-    const response = await client(ctx).chat.completions.create({
+    const reasoning = isReasoning(model);
+    // Reasoning modelinde gizli akıl yürütme token yer → içerik boş kalmasın diye yüksek bütçe.
+    const body: Record<string, unknown> = {
       model,
-      max_completion_tokens: maxTokens,
+      max_completion_tokens: reasoning ? Math.max(maxTokens, 16000) : maxTokens,
       messages: [
         { role: "system", content: system },
         { role: "user", content: user },
       ],
-    });
+    };
+    // Hamle için düşük reasoning çabası → hızlı + bütçe taşmaz (Ollama'daki think:false karşılığı)
+    if (reasoning && effort) body.reasoning_effort = effort;
+    const response = await client(ctx).chat.completions.create(body as never);
     return response.choices[0]?.message?.content ?? "";
   } catch (err) {
     throw new ProviderUnreachableError("openai", err instanceof Error ? err.message : String(err));
@@ -41,7 +52,7 @@ export const openaiProvider: LlmProvider = {
   id: "openai",
 
   getMoveRaw(req: MoveRequest, ctx: LlmContext): Promise<string> {
-    return chat(ctx, req.model, moveSystem(req.persona), buildMovePrompt(req), 1024);
+    return chat(ctx, req.model, moveSystem(req.persona), buildMovePrompt(req), 2000, "low");
   },
 
   getCompletion(

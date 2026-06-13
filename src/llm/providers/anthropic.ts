@@ -29,7 +29,7 @@ export const anthropicProvider: LlmProvider = {
     try {
       const response = await client(ctx).messages.create({
         model: req.model,
-        max_tokens: 1024,
+        max_tokens: 2000,
         system: moveSystem(req.persona),
         messages: [{ role: "user", content: buildMovePrompt(req) }],
       });

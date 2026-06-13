@@ -16,6 +16,8 @@ export interface LlmContext {
   apiKeys: { anthropic: string; openai: string; gemini: string };
   ollamaBaseUrl: string;
   customEndpoints: CustomEndpoint[];
+  /** Ollama: derin düşünme (think açık) — güçlü ama yavaş */
+  ollamaDeepThink?: boolean;
 }
 
 export interface LlmProvider {

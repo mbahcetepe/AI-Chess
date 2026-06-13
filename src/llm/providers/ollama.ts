@@ -28,14 +28,15 @@ export const ollamaProvider: LlmProvider = {
   id: "ollama",
 
   async getMoveRaw(req: MoveRequest, ctx: LlmContext): Promise<string> {
-    // think:false → "düşünme" modelleri (gemma vb.) saniyeler süren reasoning yerine
-    // ~0.6sn'de doğrudan yasal hamle verir. Test: gemma4:12b'de 0 fallback, 15/16 ilk deneme.
+    // Derin düşünme açıksa: think serbest (model akıl yürütür → güçlü ama yavaş, num_predict yok).
+    // Kapalıysa: think:false → "düşünme" modelleri ~0.6sn'de doğrudan hamle verir (hızlı ama zayıf).
+    const deep = !!ctx.ollamaDeepThink;
     try {
       return await postChat(ctx, {
         model: req.model,
         stream: false,
-        think: false,
-        options: { temperature: 0.4, top_p: 0.9 },
+        think: deep ? undefined : false,
+        options: deep ? { temperature: 0.4, top_p: 0.9 } : { temperature: 0.4, top_p: 0.9, num_predict: 1024 },
         messages: [
           { role: "system", content: moveSystem(req.persona) },
           { role: "user", content: buildMovePrompt(req) },

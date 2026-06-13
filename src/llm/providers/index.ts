@@ -1,7 +1,7 @@
 import type { ProviderId, ProviderInfo, ProviderRef } from "../../types";
 import type { LlmContext, LlmProvider } from "../types";
 import { anthropicProvider, ANTHROPIC_MODELS } from "./anthropic";
-import { geminiProvider, GEMINI_MODELS } from "./gemini";
+import { geminiProvider, GEMINI_MODELS, listGeminiModels } from "./gemini";
 import { mockProvider, MOCK_MODELS } from "./mock";
 import { ollamaProvider, listOllamaModels } from "./ollama";
 import { openaiProvider, listOpenAiModels } from "./openai";
@@ -45,9 +45,10 @@ export function providerDisplayName(ref: ProviderRef, ctx: LlmContext): string {
 
 /** Yapılandırma durumu + model listeleri. */
 export async function getProviders(ctx: LlmContext): Promise<ProviderInfo[]> {
-  const [ollamaModels, openaiModels, ...customModelLists] = await Promise.all([
+  const [ollamaModels, openaiModels, geminiModels, ...customModelLists] = await Promise.all([
     listOllamaModels(ctx),
     ctx.apiKeys.openai ? listOpenAiModels(ctx) : Promise.resolve([]),
+    ctx.apiKeys.gemini ? listGeminiModels(ctx) : Promise.resolve(GEMINI_MODELS),
     ...ctx.customEndpoints.map((e) => listCustomModels(e)),
   ]);
 
@@ -55,7 +56,7 @@ export async function getProviders(ctx: LlmContext): Promise<ProviderInfo[]> {
     { id: "stockfish", name: PROVIDER_NAMES.stockfish, configured: true, models: ENGINE_MODEL_IDS, isEngine: true },
     { id: "anthropic", name: PROVIDER_NAMES.anthropic, configured: !!ctx.apiKeys.anthropic, models: ANTHROPIC_MODELS },
     { id: "openai", name: PROVIDER_NAMES.openai, configured: !!ctx.apiKeys.openai, models: openaiModels },
-    { id: "gemini", name: PROVIDER_NAMES.gemini, configured: !!ctx.apiKeys.gemini, models: GEMINI_MODELS },
+    { id: "gemini", name: PROVIDER_NAMES.gemini, configured: !!ctx.apiKeys.gemini, models: geminiModels },
     { id: "ollama", name: PROVIDER_NAMES.ollama, configured: ollamaModels !== null && ollamaModels.length > 0, models: ollamaModels ?? [] },
   ];
 
@@ -77,6 +78,12 @@ export function contextFromSettings(s: {
   apiKeys: { anthropic: string; openai: string; gemini: string };
   ollamaBaseUrl: string;
   customEndpoints: import("../../types").CustomEndpoint[];
+  ollamaDeepThink?: boolean;
 }): LlmContext {
-  return { apiKeys: s.apiKeys, ollamaBaseUrl: s.ollamaBaseUrl, customEndpoints: s.customEndpoints };
+  return {
+    apiKeys: s.apiKeys,
+    ollamaBaseUrl: s.ollamaBaseUrl,
+    customEndpoints: s.customEndpoints,
+    ollamaDeepThink: s.ollamaDeepThink,
+  };
 }

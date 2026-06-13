@@ -14,7 +14,7 @@ type TestState = "idle" | "testing" | "ok" | "fail";
 const KEY_PROVIDERS: { id: keyof ApiKeys; label: string; testModel: string }[] = [
   { id: "anthropic", label: "Claude (Anthropic)", testModel: "claude-haiku-4-5" },
   { id: "openai", label: "ChatGPT (OpenAI)", testModel: "gpt-4o-mini" },
-  { id: "gemini", label: "Gemini (Google)", testModel: "gemini-2.0-flash" },
+  { id: "gemini", label: "Gemini (Google)", testModel: "gemini-2.5-flash" },
 ];
 
 export default function SettingsPage() {
@@ -140,6 +140,10 @@ export default function SettingsPage() {
           <label>{t("settings.aiDelay")}</label>
           <input type="number" min={0} max={10000} step={100} value={s.aiVsAiDelayMs}
             onChange={(e) => s.setAiVsAiDelayMs(Number(e.target.value))} style={{ width: 110 }} />
+        </div>
+        <div className="settings-row">
+          <label>{t("settings.ollamaDeepThink")}</label>
+          <input type="checkbox" checked={s.ollamaDeepThink} onChange={(e) => s.setOllamaDeepThink(e.target.checked)} className="chk" />
         </div>
       </section>
 
