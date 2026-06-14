@@ -238,6 +238,14 @@ class StockfishEngine {
 
 export const engine = new StockfishEngine();
 
+/**
+ * Maç-sonu toplu analizi (analyzeGame) için AYRI motor örneği — kendi worker'ı
+ * ve kuyruğu var. Böylece arka plan analizi, canlı oyun motorunu (hamle/eval bar)
+ * ASLA bloklamaz; yoksa analiz biterken yeni oyunda AI hamlesi kuyrukta bekleyip
+ * uygulama donmuş gibi görünür.
+ */
+export const analysisEngine = new StockfishEngine();
+
 export function levelById(id: number): EngineLevel {
   return ENGINE_LEVELS.find((l) => l.id === id) ?? ENGINE_LEVELS[2];
 }

@@ -90,6 +90,9 @@ function playSound(san: string, isCheck: boolean): void {
 }
 
 export const useGameStore = create<GameStore>((set, get) => {
+  // Maç-sonu otomatik analizini iptal etmek için (yeni oyun başlayınca)
+  let analysisAbort: AbortController | null = null;
+
   function persistMovesAndFinish(result: GameResult, termination: Termination): void {
     const s = get();
     const opening = detectOpening(s.chess.history());
@@ -111,9 +114,14 @@ export const useGameStore = create<GameStore>((set, get) => {
     const s = get();
     const settings = useSettingsStore.getState();
     if (!settings.autoAnalyze || s.gameId == null || s.moves.length < 2) return;
+    // Önceki analiz hâlâ sürüyorsa iptal et; bu maç için yeni token oluştur
+    analysisAbort?.abort();
+    analysisAbort = new AbortController();
+    const signal = analysisAbort.signal;
     try {
       const { analyzeGame } = await import("../engine/analysis");
-      const result = await analyzeGame(s.moves, Math.min(settings.analysisDepth, 12));
+      const result = await analyzeGame(s.moves, Math.min(settings.analysisDepth, 12), undefined, signal);
+      if (signal.aborted) return;
       await repo.saveAnalysis(
         s.gameId,
         result.whiteAccuracy,
@@ -169,6 +177,8 @@ export const useGameStore = create<GameStore>((set, get) => {
   }
 
   async function init(mode: GameMode, white: PlayerConfig, black: PlayerConfig, startFen?: string): Promise<void> {
+    // Önceki maçın arka plan analizini durdur — canlı motoru/CPU'yu serbest bırak
+    analysisAbort?.abort();
     const settings = useSettingsStore.getState();
     let chess: Chess;
     try {

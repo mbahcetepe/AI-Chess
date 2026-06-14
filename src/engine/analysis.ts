@@ -1,5 +1,5 @@
 import { Chess } from "chess.js";
-import { engine } from "./stockfish";
+import { analysisEngine } from "./stockfish";
 import { bookDepth } from "./openings";
 import type { MoveQuality, MoveRecord } from "../types";
 
@@ -68,6 +68,7 @@ export async function analyzeGame(
   moves: MoveRecord[],
   depth: number,
   onProgress?: (done: number, total: number) => void,
+  signal?: AbortSignal,
 ): Promise<GameAnalysis> {
   const chess = new Chess();
   const sanSoFar: string[] = [];
@@ -76,13 +77,15 @@ export async function analyzeGame(
   const blackAccs: number[] = [];
 
   for (let i = 0; i < moves.length; i++) {
+    // Yeni oyun başladıysa / iptal edildiyse analizi bırak (CPU'yu boşa harcama)
+    if (signal?.aborted) throw new DOMException("Analiz iptal edildi", "AbortError");
     const rec = moves[i];
     const fenBefore = chess.fen();
     const moverIsWhite = chess.turn() === "w";
     const book = i < bookDepth(sanSoFar.concat(rec.san));
 
     // Hamleden önceki en iyi değerlendirme (hamleyi yapan perspektifi)
-    const before = await engine.evaluate(fenBefore, depth);
+    const before = await analysisEngine.evaluate(fenBefore, depth);
     const bestCpMover = moverIsWhite ? before.cp : -before.cp;
 
     chess.move(rec.san);
@@ -90,7 +93,7 @@ export async function analyzeGame(
     const fenAfter = chess.fen();
 
     // Hamleden sonraki değerlendirme; rakip sırada → o perspektiften çevir
-    const after = await engine.evaluate(fenAfter, depth);
+    const after = await analysisEngine.evaluate(fenAfter, depth);
     const afterCpMover = moverIsWhite ? after.cp : -after.cp;
 
     const cpLoss = Math.max(0, bestCpMover - afterCpMover);

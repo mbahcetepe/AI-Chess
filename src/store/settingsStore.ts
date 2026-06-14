@@ -4,11 +4,11 @@ import { getSecret, setSecret } from "../secrets";
 
 /** İlk açılışta gelen hazır personalar (Stockfish destekli — anahtarsız çalışır). */
 const BUILTIN_PROFILES: OpponentProfile[] = [
-  { id: "profile:builtin-1", name: "Acemi Aslı", emoji: "🐣", color: "#5ab46e", provider: "stockfish", model: "level-1", systemPrompt: "", rating: 1200, builtin: true },
-  { id: "profile:builtin-2", name: "Sabırlı Sami", emoji: "🧘", color: "#4d9fff", provider: "stockfish", model: "level-3", systemPrompt: "", rating: 1500, builtin: true },
-  { id: "profile:builtin-3", name: "Sert Sırrı", emoji: "😤", color: "#e0894a", provider: "stockfish", model: "level-5", systemPrompt: "", rating: 1900, builtin: true },
-  { id: "profile:builtin-4", name: "Stratejist Selin", emoji: "🦊", color: "#a855f7", provider: "stockfish", model: "level-6", systemPrompt: "", rating: 2200, builtin: true },
-  { id: "profile:builtin-5", name: "Usta Umut", emoji: "🎓", color: "#f4c14e", provider: "stockfish", model: "level-8", systemPrompt: "", rating: 2900, builtin: true },
+  { id: "profile:builtin-1", name: "Rookie Rosa", emoji: "🐣", color: "#5ab46e", provider: "stockfish", model: "level-1", systemPrompt: "", rating: 1200, builtin: true },
+  { id: "profile:builtin-2", name: "Patient Pete", emoji: "🧘", color: "#4d9fff", provider: "stockfish", model: "level-3", systemPrompt: "", rating: 1500, builtin: true },
+  { id: "profile:builtin-3", name: "Tough Tom", emoji: "😤", color: "#e0894a", provider: "stockfish", model: "level-5", systemPrompt: "", rating: 1900, builtin: true },
+  { id: "profile:builtin-4", name: "Strategist Sara", emoji: "🦊", color: "#a855f7", provider: "stockfish", model: "level-6", systemPrompt: "", rating: 2200, builtin: true },
+  { id: "profile:builtin-5", name: "Master Mark", emoji: "🎓", color: "#f4c14e", provider: "stockfish", model: "level-8", systemPrompt: "", rating: 2900, builtin: true },
 ];
 
 export interface ApiKeys {
@@ -77,7 +77,7 @@ type Persisted = Omit<
 const DEFAULTS: Persisted = {
   nickname: "",
   theme: "classic",
-  language: "tr",
+  language: "en",
   showHints: true,
   soundEnabled: true,
   apiKeys: { anthropic: "", openai: "", gemini: "" },

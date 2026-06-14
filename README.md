@@ -2,11 +2,11 @@
 
 # ♞ AI Chess
 
-### Yapay zekâ modellerine ve güçlü Stockfish motoruna karşı satranç
+### Play chess against AI models and the powerful Stockfish engine
 
-*"Hayatta en hakiki mürşit ilimdir"*
+*"The truest guide in life is knowledge"*
 
-Claude · ChatGPT · Gemini · Ollama · OpenAI-uyumlu servisler · Stockfish 18
+Claude · ChatGPT · Gemini · Ollama · OpenAI-compatible services · Stockfish 18
 
 **Tauri** • **React** • **TypeScript** • **chess.js** • **SQLite**
 
@@ -14,175 +14,195 @@ Claude · ChatGPT · Gemini · Ollama · OpenAI-uyumlu servisler · Stockfish 18
 
 ---
 
-## 📖 Nedir?
+## 📸 Screenshots
 
-**AI Chess**, yapay zekâ modellerine ve gömülü **Stockfish** motoruna karşı satranç
-oynayabileceğiniz, maçlarınızı kaydedip analiz edebileceğiniz bir **masaüstü uygulamasıdır**.
-Kurulum gerektirmez — tek bir `Chess.exe`'ye çift tıklayın, oynamaya başlayın.
+<div align="center">
 
-Bulut modellerine (Claude, ChatGPT, Gemini) ve lokal modellere (Ollama, Open WebUI,
-OpenRouter, LM Studio) karşı oynayabilir; iki modeli birbirine karşı izleyebilir;
-maçlarınızı chess.com seviyesinde analiz edebilirsiniz.
+![AI Chess home](docs/screenshots/home.png)
 
----
+| Play | Tournament | Settings |
+|:---:|:---:|:---:|
+| ![Playing against an AI profile](docs/screenshots/play.png) | ![Model tournament](docs/screenshots/tournament.png) | ![Settings tabs](docs/screenshots/settings.png) |
 
-## ✨ Özellikler
-
-### 🎮 Oyun Modları
-- **İnsan vs Yapay Zekâ** — bir AI modeline veya Stockfish'e karşı oyna
-- **Yapay Zekâ vs Yapay Zekâ** — iki modeli karşı karşıya getir, izle (duraklat/hız)
-- **İnsan vs İnsan** — aynı bilgisayarda iki oyuncu
-
-### 🤖 Rakipler
-- **Stockfish 18 motoru** (gömülü, anahtarsız, çevrimdışı) — 8 seviye, ELO ~1320–3190
-- **Claude · ChatGPT · Gemini** — API anahtarınızı girin
-- **Ollama** (lokal modeller) — adresinizi girin, anahtar gerekmez
-- **OpenAI-uyumlu uç noktalar** — Open WebUI, OpenRouter, LM Studio…
-
-### 🎭 Profiller (chess.com botları gibi)
-- 5 hazır persona (Acemi Aslı 🐣 → Usta Umut 🎓)
-- **Kendi profilini oluştur:** model + isim + emoji avatar + renk + puan + **kişilik promptu**
-- Kişilik promptu modelin oyun tarzını belirler (örn. *"Agresif oyna, gambit sev"*)
-
-### 🔬 Analiz (Stockfish)
-- Canlı **değerlendirme çubuğu** (eval bar)
-- **Maçı Analiz Et:** her hamleye *En iyi / İyi / Yanlışlık / Hata / Vahim hata* etiketi
-- **Doğruluk %** ve **değerlendirme grafiği**
-- **Çoklu hat** (en iyi 3 varyant) + tahtada en-iyi-hamle oku
-- **Gözden Geçir** modu (hatalar arası gezinme)
-
-### 📝 Kayıt, Replay, Rapor
-- Tüm maçlar SQLite'a kaydedilir (tarih, saat, hamleler, model, sonuç, açılış adı)
-- **Replay:** otomatik oynatma (0.5x–4x), adım adım, hamleye atlama
-- **YZ Maç Raporu:** bir model maçı analiz edip Markdown rapor yazar → `.md` olarak kaydet
-- **PGN dışa aktarma**
-
-### 🎨 Arayüz
-- 2 tema: **Klasik** (ahşap + staunton taşlar) ve **Modern** (gri-mavi + düz taşlar)
-- Yasal hamle ipuçları, geri al, beraberlik, rövanş, tahta çevir, FEN'den başlat
-- İsteğe bağlı satranç saati (blitz/rapid)
-- Alınan taşlar + materyal göstergesi, hamle/alma/şah sesleri, klavye
-- **Türkçe / İngilizce** dil seçici
+</div>
 
 ---
 
-## 🚀 Kurulum & Kullanım
+## 📖 What is it?
 
-### Son kullanıcı
-1. **`AI Chess.exe`**'ye çift tıklayın (kurulum gerektirmez, taşınabilir)
-2. İlk açılışta **adınızı** girin
-3. **Oyna** → bir profile/modele karşı başlayın
-   - Anahtarsız hemen denemek için **Stockfish profilleri** veya **"Motora Karşı Oyna"**
-4. **Ayarlar → AI Sağlayıcıları**'ndan API anahtarlarınızı / Ollama adresinizi girin
+**AI Chess** is a **desktop application** where you can play chess against AI models and
+the embedded **Stockfish** engine, and record and analyze your games. No installation
+required — double-click a single `AI Chess.exe` and start playing.
 
-### API Anahtarları
-Anahtarlar **uygulama içinden** (Ayarlar) girilir ve `%APPDATA%\com.murat.chess\settings.json`
-dosyasına kaydedilir. **Kaynak koda veya repoya yazılmaz** — güvenlik gereği.
-
-### Veriler
-Tüm maçlar `%APPDATA%\com.murat.chess\chess.db` dosyasında. Yedek = bu dosyayı kopyalayın.
+Play against cloud models (Claude, ChatGPT, Gemini) and local models (Ollama, Open WebUI,
+OpenRouter, LM Studio); watch two models play each other; and analyze your games at a
+chess.com-grade level of detail.
 
 ---
 
-## 🛠️ Geliştirme
+## ✨ Features
 
-### Önkoşullar
+### 🎮 Game Modes
+- **Human vs AI** — play against an AI model or Stockfish
+- **AI vs AI** — pit two models against each other and watch (pause / speed control)
+- **Human vs Human** — two players on the same computer
+
+### 🤖 Opponents
+- **Stockfish 18 engine** (embedded, no key, offline) — 8 levels, ELO ~1320–3190
+- **Claude · ChatGPT · Gemini** — enter your API key
+- **Ollama** (local models) — enter your address, no key required
+- **OpenAI-compatible endpoints** — Open WebUI, OpenRouter, LM Studio…
+
+### 🎭 Profiles (like chess.com bots)
+- 5 ready-made personas (Beginner → Master)
+- **Create your own profile:** model + name + emoji avatar + color + rating + **personality prompt**
+- The personality prompt shapes the model's playing style (e.g. *"Play aggressively, love gambits"*)
+
+### 🔬 Analysis (Stockfish)
+- Live **evaluation bar**
+- **Analyze Game:** each move labeled *Best / Good / Inaccuracy / Mistake / Blunder*, plus
+  **brilliant move (!!)** detection
+- **Accuracy %** and **evaluation graph**
+- **Multi-line** (top 3 variations) + best-move arrow on the board
+- **Review** mode (step through mistakes)
+
+### 📝 Records, Replay, Report
+- Every game is saved to SQLite (date, time, moves, model, result, opening name)
+- **Replay:** auto-play (0.5x–4x), step by step, jump to any move
+- **AI Match Report:** a model analyzes the game and writes a Markdown report → save as `.md`
+- **PGN export**
+
+### 🎨 Interface
+- 2 themes: **Classic** (wood + staunton pieces) and **Modern** (gray-blue + flat pieces)
+- Legal-move hints, undo, draw, rematch, flip board, start from FEN
+- Optional chess clock (blitz / rapid)
+- Captured pieces + material indicator, move/capture/check sounds, keyboard support
+- **Turkish / English** language switcher
+
+---
+
+## 🚀 Installation & Usage
+
+### End user
+1. Double-click **`AI Chess.exe`** (no installation required, portable)
+2. Enter **your name** on first launch
+3. **Play** → start against a profile/model
+   - To try instantly without a key, use the **Stockfish profiles** or **"Play vs Engine"**
+4. Enter your API keys / Ollama address under **Settings → AI Providers**
+
+### API Keys
+Keys are entered **inside the app** (Settings) and stored **DPAPI-encrypted** in the SQLite
+`secrets` table (`%APPDATA%\com.murat.chess\`). **They are never written to source code or
+the repo**, nor to `settings.json` in plain text — by design.
+
+### Data
+All games live in `%APPDATA%\com.murat.chess\chess.db`. To back up, copy that file.
+
+### Auto-update
+The app checks for new versions via **GitHub Releases**. Open **About → Check for Updates**;
+if a newer signed version exists, it downloads and installs it, then restarts.
+
+---
+
+## 🛠️ Development
+
+### Prerequisites
 - Node.js 20+
-- Rust **1.90.0** (proje `rust-toolchain.toml` ile sabitler)
-- Windows'ta **Visual Studio 2019 BuildTools** (C++ masaüstü iş yükü)
+- Rust **1.90.0** (pinned via `rust-toolchain.toml`)
+- On Windows, **Visual Studio 2019 BuildTools** (C++ desktop workload)
 
-### Komutlar
+### Commands
 ```bash
 npm install
-npm run dev          # Vite dev sunucusu (tarayıcı, kısmi)
-npm run tauri dev    # masaüstü pencere (geliştirme)
-npm test             # vitest birim testleri
-npx tsc --noEmit     # tip kontrolü
+npm run dev          # Vite dev server (browser, partial)
+npm run tauri dev    # desktop window (development)
+npm test             # vitest unit tests
+npx tsc --noEmit     # type check
 ```
 
-### Üretim derlemesi (Windows — KRİTİK)
-Bu makinede C++ linker'ı **VS2019 BuildTools** ortamı gerektirir. Hazır betik:
+### Production build (Windows — CRITICAL)
+On this machine the C++ linker requires the **VS2019 BuildTools** environment. Ready script:
 ```bat
 build-tauri.bat build
 ```
-veya elle:
+or manually:
 ```bat
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 set "PATH=%USERPROFILE%\.cargo\bin;%PATH%"
 npm run tauri build
 ```
-Çıktı: `src-tauri/target/release/ai-chess.exe` (~13 MB) ve NSIS kurulum paketi.
+Output: `src-tauri/target/release/ai-chess.exe` (~13 MB) and the NSIS installer.
 
-> ⚠️ Rust 1.96 → `tauri-utils` E0119 hatası verir; **1.90.0 kullanın**.
-> `time` crate **0.3.47**'de sabit (0.3.48 bozuk).
+> ⚠️ Rust 1.96 triggers a `tauri-utils` E0119 error; **use 1.90.0**.
+> The `time` crate is pinned at **0.3.47** (0.3.48 is broken).
 
 ---
 
-## 🗂️ Mimari
+## 🗂️ Architecture
 
 ```
-src/                      React + TS (tüm uygulama mantığı)
-  engine/                 Stockfish sürücüsü, analiz, açılış tespiti
+src/                      React + TS (all application logic)
+  engine/                 Stockfish driver, analysis, opening detection
   llm/                    prompt, parseMove, moveService, providers/, httpProxy
   store/                  gameStore, settingsStore (Zustand)
   components/, pages/      UI
-src-tauri/                Rust çekirdeği: http_proxy komutu + SQL migration
-public/engine/            Stockfish 18 Lite WASM (gömülü)
+src-tauri/                Rust core: http_proxy command + SQL migrations
+public/engine/            Stockfish 18 Lite WASM (embedded)
 ```
 
-| Katman | Teknoloji |
+| Layer | Technology |
 |---|---|
-| Masaüstü kabuk | Tauri 2 (WebView2) |
-| Arayüz | React 19 + TypeScript |
-| Kural motoru | chess.js |
-| Tahta | react-chessboard |
-| Analiz motoru | Stockfish 18 Lite (WASM, Web Worker) |
-| Durum | Zustand |
-| Veritabanı | SQLite (tauri-plugin-sql) |
+| Desktop shell | Tauri 2 (WebView2) |
+| UI | React 19 + TypeScript |
+| Rules engine | chess.js |
+| Board | react-chessboard |
+| Analysis engine | Stockfish 18 Lite (WASM, Web Worker) |
+| State | Zustand |
+| Database | SQLite (tauri-plugin-sql) |
 
 ---
 
-## 🧠 Teknik Notlar
+## 🧠 Technical Notes
 
-- **Ollama CORS:** İstekler Rust backend'inden (reqwest, `http_proxy`) gider — webview
-  origin'i gönderilmediği için Ollama'nın 403 reddi tetiklenmez.
-- **"Düşünme" modelleri (gemma vb.):** Hamle isteğine `think: false` eklenir; aksi halde
-  model saniyelerce reasoning üretip token sınırına takılır. Test: gemma4:12b'de
-  0 fallback, ~615ms/hamle.
-- **Yasadışı hamle güvencesi:** Serbest düşünme + parser + 4 denemeli geri bildirim
-  döngüsü; son çare rastgele yasal hamle (oyun asla takılmaz).
+- **Ollama CORS:** Requests go through the Rust backend (reqwest, `http_proxy`) — since the
+  webview origin is not sent, Ollama's 403 rejection is never triggered.
+- **"Thinking" models (gemma, etc.):** `think: false` is added to move requests; otherwise the
+  model spends seconds on reasoning and hits the token limit. Tested: gemma4:12b had
+  0 fallbacks, ~615ms/move.
+- **Illegal-move guarantee:** Free reasoning + parser + a 4-attempt feedback loop; as a last
+  resort, a random legal move (the game never stalls).
 
-Ayrıntılar için [`CHANGELOG.md`](./CHANGELOG.md) ve [`CLAUDE.md`](./CLAUDE.md).
+For details, see [`CHANGELOG.md`](./CHANGELOG.md).
 
 ---
 
-## 📜 Lisans
+## 📜 License
 
-Bu proje **GPL-3.0** ile lisanslanmıştır — çünkü satranç motoru olarak **Stockfish**
-(GPL-3.0) gömülüdür. Ayrıntılar: [`LICENSE`](./LICENSE) ve
+This project is licensed under **GPL-3.0** — because **Stockfish** (GPL-3.0) is embedded as
+the chess engine. Details: [`LICENSE`](./LICENSE) and
 [`THIRD-PARTY-NOTICES.md`](./THIRD-PARTY-NOTICES.md).
 
-- ✅ Ticari kullanım ve satış serbesttir.
-- ⚠️ Dağıtırken **tam kaynak kodu** GPL-3.0 koşullarıyla sağlanmalıdır; kapalı kaynak
-  (proprietary) yapılamaz. Kapalı bir ürün için Stockfish gömülmemeli, kullanıcı tarafından
-  ayrıca kurulan bir UCI motoruyla çalışılmalıdır.
+- ✅ Commercial use and sale are permitted.
+- ⚠️ When distributing, the **full source code** must be provided under GPL-3.0 terms; it
+  cannot be made proprietary (closed-source). For a closed product, Stockfish must not be
+  embedded — instead rely on a UCI engine installed separately by the user.
 
-> Bu bir hukuki tavsiye değildir; kesinlik için bir hukukçuya danışın.
+> This is not legal advice; consult a lawyer for certainty.
 
 ---
 
-## 👤 Geliştiren
+## 👤 Developer
 
 **Murat Bahçetepe**
 
-Bu uygulamayı tasarlayıp geliştiren kişi. Yapay zekâ, satranç ve yazılımın kesişiminde
-keyifli, profesyonel bir araç ortaya koymayı amaçladı. Geri bildirim, öneri, hata
-bildirimi veya işbirliği için çekinmeden ulaşın:
+The designer and developer of this application, aiming to build an enjoyable, professional
+tool at the intersection of artificial intelligence, chess, and software. Feel free to reach
+out for feedback, suggestions, bug reports, or collaboration:
 
 📧 **[mbahcetepe@gmail.com](mailto:mbahcetepe@gmail.com)**
 
 <div align="center">
 
-*"Hayatta en hakiki mürşit ilimdir."*
+*"The truest guide in life is knowledge."*
 
 </div>
