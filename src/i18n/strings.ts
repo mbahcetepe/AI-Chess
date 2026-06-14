@@ -274,7 +274,7 @@ const tr = {
 };
 
 const en: Record<keyof typeof tr, string> = {
-  "app.motto": "The truest guide in life is knowledge",
+  "app.motto": "In life, the truest guide is science.",
   "update.check": "Check for Updates",
   "update.checking": "Checking…",
   "update.uptodate": "You're on the latest version ✓",

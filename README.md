@@ -4,7 +4,7 @@
 
 ### Play chess against AI models and the powerful Stockfish engine
 
-*"The truest guide in life is knowledge"*
+*"In life, the truest guide is science."*
 
 Claude · ChatGPT · Gemini · Ollama · OpenAI-compatible services · Stockfish 18
 
@@ -203,6 +203,6 @@ out for feedback, suggestions, bug reports, or collaboration:
 
 <div align="center">
 
-*"The truest guide in life is knowledge."*
+*"In life, the truest guide is science."*
 
 </div>
