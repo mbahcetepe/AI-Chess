@@ -94,8 +94,23 @@ export default function GameSetupDialog({ open, initialMode, initialPrefer, onSt
     return (
       <div className="opp-picker">
         <div className="opp-tabs">
-          <button className={tab === "profile" ? "active" : ""} onClick={() => setTab("profile")}>{t("setup.tabProfile")}</button>
-          <button className={tab === "model" ? "active" : ""} onClick={() => setTab("model")}>{t("setup.tabModel")}</button>
+          <button
+            className={tab === "profile" ? "active" : ""}
+            onClick={() => {
+              setTab("profile");
+              if (sel?.kind !== "profile" && profiles[0]) setSel({ kind: "profile", profileId: profiles[0].id });
+            }}
+          >{t("setup.tabProfile")}</button>
+          <button
+            className={tab === "model" ? "active" : ""}
+            onClick={() => {
+              setTab("model");
+              if (sel?.kind !== "model") {
+                const p = providers.find((x) => x.configured && x.models.length > 0) ?? providers.find((x) => x.models.length > 0);
+                if (p) setSel({ kind: "model", provider: p.id, model: p.models[0] });
+              }
+            }}
+          >{t("setup.tabModel")}</button>
         </div>
 
         {tab === "profile" ? (
@@ -190,6 +205,7 @@ export default function GameSetupDialog({ open, initialMode, initialPrefer, onSt
           <button className="icon-btn" onClick={onClose} aria-label={t("setup.close")}>✕</button>
         </div>
 
+        <div className="setup-body">
         <div className="field-label">{t("setup.mode")}</div>
         <div className="mode-buttons">
           {MODES.map((m) => (
@@ -241,6 +257,7 @@ export default function GameSetupDialog({ open, initialMode, initialPrefer, onSt
             {!fenValid && <div className="field-error">{t("setup.fenInvalid")}</div>}
           </>
         )}
+        </div>
 
         <div className="dialog-actions">
           <button onClick={onClose}>{t("setup.cancel")}</button>
