@@ -1,14 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useT } from "../i18n/strings";
 import { useSettingsStore } from "../store/settingsStore";
 import { checkForUpdate, installUpdate, type UpdateState } from "../updater";
-
-const APP_VERSION = "1.0.0";
 
 export default function AboutPage() {
   const t = useT();
   const lang = useSettingsStore((s) => s.language);
   const [upd, setUpd] = useState<UpdateState>({ status: "idle" });
+  const [appVersion, setAppVersion] = useState("");
+  useEffect(() => {
+    import("@tauri-apps/api/app")
+      .then(({ getVersion }) => getVersion())
+      .then(setAppVersion)
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="doc-page">
@@ -16,7 +21,7 @@ export default function AboutPage() {
         <div className="about-logo">♞</div>
         <h1 className="about-title">AI Chess</h1>
         <div className="about-motto">“{t("app.motto")}”</div>
-        <div className="about-version">v{APP_VERSION}</div>
+        <div className="about-version">v{appVersion}</div>
 
         <div className="about-section">
           <h3>{lang === "tr" ? "Geliştiren" : "Developed by"}</h3>
