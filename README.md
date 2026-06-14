@@ -116,6 +116,7 @@ if a newer signed version exists, it downloads and installs it, then restarts.
 npm install
 npm run dev          # Vite dev server (browser, partial)
 npm run tauri dev    # desktop window (development)
+npm test             # vitest unit tests
 npx tsc --noEmit     # type check
 ```
 
