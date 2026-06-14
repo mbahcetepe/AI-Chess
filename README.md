@@ -14,20 +14,6 @@ Claude · ChatGPT · Gemini · Ollama · OpenAI-compatible services · Stockfish
 
 ---
 
-## 📸 Screenshots
-
-<div align="center">
-
-![AI Chess home](docs/screenshots/home.png)
-
-| Play | Tournament | Settings |
-|:---:|:---:|:---:|
-| ![Playing against an AI profile](docs/screenshots/play.png) | ![Model tournament](docs/screenshots/tournament.png) | ![Settings tabs](docs/screenshots/settings.png) |
-
-</div>
-
----
-
 ## 📖 What is it?
 
 **AI Chess** is a **desktop application** where you can play chess against AI models and
