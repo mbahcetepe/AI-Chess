@@ -36,7 +36,7 @@ export default function MoveList({ moves, currentPly, onSelectPly }: MoveListPro
   }
 
   const QUALITY_MARK: Record<string, string> = {
-    blunder: "??", mistake: "?", inaccuracy: "?!", best: "", good: "", book: "",
+    brilliant: "!!", blunder: "??", mistake: "?", inaccuracy: "?!", best: "", good: "", book: "",
   };
   const cell = (m?: MoveRecord) =>
     m ? (

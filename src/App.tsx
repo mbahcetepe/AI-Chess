@@ -6,6 +6,7 @@ import ReplayPage from "./pages/ReplayPage";
 import SettingsPage from "./pages/SettingsPage";
 import HelpPage from "./pages/HelpPage";
 import AboutPage from "./pages/AboutPage";
+import TournamentPage from "./pages/TournamentPage";
 import { useSettingsStore } from "./store/settingsStore";
 import { setSoundEnabled } from "./sound";
 import { useT } from "./i18n/strings";
@@ -18,6 +19,7 @@ function Nav() {
       <span className="brand-motto">“{t("app.motto")}”</span>
       <div className="nav-spacer" />
       <NavLink to="/" end>{t("nav.play")}</NavLink>
+      <NavLink to="/tournament">{t("nav.tournament")}</NavLink>
       <NavLink to="/history">{t("nav.history")}</NavLink>
       <NavLink to="/settings">{t("nav.settings")}</NavLink>
       <NavLink to="/help">{t("nav.help")}</NavLink>
@@ -49,6 +51,7 @@ export default function App() {
       <main className="page">
         <Routes>
           <Route path="/" element={<PlayPage />} />
+          <Route path="/tournament" element={<TournamentPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/replay/:id" element={<ReplayPage />} />
           <Route path="/settings" element={<SettingsPage />} />

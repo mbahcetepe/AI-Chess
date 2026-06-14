@@ -39,6 +39,7 @@ interface SettingsState {
   clock: ClockConfig;
   aiVsAiDelayMs: number;
   ollamaDeepThink: boolean;
+  autoAnalyze: boolean;
   loaded: boolean;
 
   setNickname: (n: string) => void;
@@ -59,6 +60,7 @@ interface SettingsState {
   setClock: (c: Partial<ClockConfig>) => void;
   setAiVsAiDelayMs: (ms: number) => void;
   setOllamaDeepThink: (v: boolean) => void;
+  setAutoAnalyze: (v: boolean) => void;
   load: () => Promise<void>;
 }
 
@@ -69,7 +71,7 @@ type Persisted = Omit<
   | "setApiKey" | "setOllamaBaseUrl" | "addCustomEndpoint" | "updateCustomEndpoint"
   | "removeCustomEndpoint" | "addProfile" | "updateProfile" | "removeProfile"
   | "setEngineLevel" | "setAnalysisDepth" | "setClock"
-  | "setAiVsAiDelayMs" | "setOllamaDeepThink" | "load"
+  | "setAiVsAiDelayMs" | "setOllamaDeepThink" | "setAutoAnalyze" | "load"
 >;
 
 const DEFAULTS: Persisted = {
@@ -88,6 +90,7 @@ const DEFAULTS: Persisted = {
   clock: { enabled: false, initialMin: 5, incrementSec: 3 },
   aiVsAiDelayMs: 800,
   ollamaDeepThink: false,
+  autoAnalyze: true,
 };
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -145,6 +148,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
       clock: s.clock,
       aiVsAiDelayMs: s.aiVsAiDelayMs,
       ollamaDeepThink: s.ollamaDeepThink,
+      autoAnalyze: s.autoAnalyze,
     });
   };
 
@@ -213,6 +217,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     setClock: (c) => { set({ clock: { ...get().clock, ...c } }); persist(); },
     setAiVsAiDelayMs: (aiVsAiDelayMs) => { set({ aiVsAiDelayMs }); persist(); },
     setOllamaDeepThink: (ollamaDeepThink) => { set({ ollamaDeepThink }); persist(); },
+    setAutoAnalyze: (autoAnalyze) => { set({ autoAnalyze }); persist(); },
 
     load: async () => {
       const saved = await readFromDisk();

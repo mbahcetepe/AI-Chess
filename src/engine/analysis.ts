@@ -26,6 +26,31 @@ function moveAccuracy(winBefore: number, winAfter: number): number {
   return Math.max(0, Math.min(100, acc));
 }
 
+const PIECE_VAL: Record<string, number> = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+
+/**
+ * Parlak hamle (💎) tespiti: en iyi hamle + bir taşı (en az hafif taş) feda ediyor
+ * (hamleden sonra rakip o taşı alabiliyor) AMA motor değerlendirmesi hâlâ lehte.
+ * Motor eval'i, fedanın "sağlam" olduğunu garanti eder.
+ */
+function isBrilliant(fenBefore: string, san: string, afterCpMover: number): boolean {
+  if (afterCpMover < 50) return false; // feda sağlam değilse parlak değil
+  try {
+    const c = new Chess(fenBefore);
+    const mv = c.move(san);
+    if (!mv) return false;
+    const sacValue = PIECE_VAL[mv.piece] ?? 0;
+    if (sacValue < 3) return false; // en az hafif taş feda edilmeli
+    // Materyal kazanan bir alış ise feda değil
+    if (mv.captured && (PIECE_VAL[mv.captured] ?? 0) >= sacValue) return false;
+    // Oynanan taş şimdi alınabilir mi (en prise)?
+    const enPrise = c.moves({ verbose: true }).some((m) => m.to === mv.to && m.captured);
+    return enPrise;
+  } catch {
+    return false;
+  }
+}
+
 function classify(cpLoss: number, isBook: boolean): MoveQuality {
   if (isBook) return "book";
   if (cpLoss <= 15) return "best";
@@ -69,7 +94,11 @@ export async function analyzeGame(
     const afterCpMover = moverIsWhite ? after.cp : -after.cp;
 
     const cpLoss = Math.max(0, bestCpMover - afterCpMover);
-    const quality = classify(cpLoss, book);
+    let quality = classify(cpLoss, book);
+    // En iyi hamle + sağlam feda → parlak (💎)
+    if (quality === "best" && isBrilliant(fenBefore, rec.san, afterCpMover)) {
+      quality = "brilliant";
+    }
 
     const winBefore = winPercent(bestCpMover);
     const winAfter = winPercent(afterCpMover);

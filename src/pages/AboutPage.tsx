@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { useT } from "../i18n/strings";
 import { useSettingsStore } from "../store/settingsStore";
+import { checkForUpdate, installUpdate, type UpdateState } from "../updater";
 
 const APP_VERSION = "1.0.0";
 
 export default function AboutPage() {
   const t = useT();
   const lang = useSettingsStore((s) => s.language);
+  const [upd, setUpd] = useState<UpdateState>({ status: "idle" });
 
   return (
     <div className="doc-page">
@@ -32,6 +35,36 @@ export default function AboutPage() {
         <div className="about-section">
           <h3>{lang === "tr" ? "Teknoloji" : "Built with"}</h3>
           <p className="about-tech">Tauri · React · TypeScript · chess.js · Stockfish 18 · SQLite</p>
+        </div>
+
+        <div className="about-section">
+          <h3>{lang === "tr" ? "Güncelleme" : "Update"}</h3>
+          {upd.status === "available" ? (
+            <>
+              <p className="about-tech" style={{ color: "var(--accent)" }}>
+                {t("update.available")}: v{upd.version}
+              </p>
+              {upd.status === "available" && (
+                <button className="primary" onClick={async () => {
+                  const u = upd.update;
+                  setUpd({ status: "downloading", pct: 0 });
+                  try { await installUpdate(u, (pct) => setUpd({ status: "downloading", pct })); }
+                  catch (e) { setUpd({ status: "error", error: e instanceof Error ? e.message : String(e) }); }
+                }}>{t("update.install")}</button>
+              )}
+              <p className="muted-small" style={{ marginTop: 6 }}>{t("update.restartNote")}</p>
+            </>
+          ) : (
+            <>
+              <button disabled={upd.status === "checking" || upd.status === "downloading"}
+                onClick={async () => { setUpd({ status: "checking" }); setUpd(await checkForUpdate()); }}>
+                {upd.status === "checking" ? t("update.checking") : t("update.check")}
+              </button>
+              {upd.status === "uptodate" && <p className="muted-small" style={{ marginTop: 6 }}>{t("update.uptodate")}</p>}
+              {upd.status === "downloading" && <p className="muted-small" style={{ marginTop: 6 }}>{t("update.downloading")} %{upd.pct}</p>}
+              {upd.status === "error" && <p className="muted-small" style={{ marginTop: 6, color: "var(--danger)" }}>{t("update.error")}: {upd.error}</p>}
+            </>
+          )}
         </div>
       </div>
     </div>

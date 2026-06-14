@@ -18,6 +18,7 @@ export type Termination =
   | "insufficient_material"
   | "draw_agreement"
   | "timeout"
+  | "move_cap"
   | "abandoned";
 
 export interface PlayerConfig {
@@ -84,7 +85,7 @@ export interface GameSummary {
 }
 
 /** Bir hamlenin Stockfish analizi sonucu kalitesi */
-export type MoveQuality = "best" | "good" | "inaccuracy" | "mistake" | "blunder" | "book";
+export type MoveQuality = "brilliant" | "best" | "good" | "inaccuracy" | "mistake" | "blunder" | "book";
 
 export interface MoveRecord {
   ply: number;
@@ -108,6 +109,40 @@ export interface ProviderInfo {
   models: string[];
   /** stockfish için seviye seçimi olduğunu UI'a bildirir */
   isEngine?: boolean;
+}
+
+/** Turnuva katılımcısı (bir profile dayanır) ve sonuç istatistikleri */
+export interface TournamentParticipant {
+  provider: ProviderRef;
+  model: string;
+  name: string;
+  emoji: string;
+  color: string;
+  rating: number;
+  systemPrompt: string;
+}
+
+export interface TournamentRecord {
+  id: number;
+  name: string;
+  created_at: string;
+  status: "running" | "finished" | "stopped";
+  rounds: number;
+  participants: string; // JSON TournamentParticipant[]
+  move_cap: number;
+}
+
+/** Karşılaştırma paneli: model başına istatistik */
+export interface ModelStat {
+  key: string; // provider/model
+  name: string;
+  games: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  winPct: number;
+  avgAccuracy: number | null;
+  avgMoveMs: number | null;
 }
 
 export function humanLabel(p: PlayerConfig, fallback: string): string {

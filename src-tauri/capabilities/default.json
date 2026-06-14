@@ -10,6 +10,8 @@
     "sql:allow-select",
     "sql:allow-load",
     "store:default",
+    "updater:default",
+    "process:default",
     "dialog:default",
     "fs:default",
     "fs:allow-write-text-file",

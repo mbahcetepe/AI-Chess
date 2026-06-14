@@ -103,6 +103,26 @@ export const useGameStore = create<GameStore>((set, get) => {
     set({ status: "over", result, termination, aiThinking: false });
     sounds.gameEnd();
     persistMovesAndFinish(result, termination);
+    void autoAnalyze();
+  }
+
+  // Oyun bitince arka planda otomatik analiz (ayar açıksa)
+  async function autoAnalyze(): Promise<void> {
+    const s = get();
+    const settings = useSettingsStore.getState();
+    if (!settings.autoAnalyze || s.gameId == null || s.moves.length < 2) return;
+    try {
+      const { analyzeGame } = await import("../engine/analysis");
+      const result = await analyzeGame(s.moves, Math.min(settings.analysisDepth, 12));
+      await repo.saveAnalysis(
+        s.gameId,
+        result.whiteAccuracy,
+        result.blackAccuracy,
+        result.moves.map((m) => ({ ply: m.ply, evalCp: m.evalCp, quality: m.quality })),
+      );
+    } catch {
+      /* analiz başarısızsa sessiz geç */
+    }
   }
 
   function applyMove(input: MoveInput, meta: MoveMeta): void {

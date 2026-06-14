@@ -22,18 +22,19 @@ export async function createGame(
   white: PlayerConfig,
   black: PlayerConfig,
   theme: ThemeId,
+  tournamentId?: number,
 ): Promise<number | null> {
   if (!isTauri) return null;
   const db = await getDb();
   const res = await db.execute(
     `INSERT INTO games (mode, white_type, white_provider, white_model, white_name,
-       black_type, black_provider, black_model, black_name, theme)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+       black_type, black_provider, black_model, black_name, theme, tournament_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
     [
       mode,
       white.type, white.provider ?? null, white.model ?? null, white.name ?? null,
       black.type, black.provider ?? null, black.model ?? null, black.name ?? null,
-      theme,
+      theme, tournamentId ?? null,
     ],
   );
   return res.lastInsertId ?? null;
@@ -152,4 +153,96 @@ export async function saveReport(gameId: number, reportMd: string, reportModel: 
     `UPDATE games SET report_md=$1, report_model=$2, report_created_at=datetime('now') WHERE id=$3`,
     [reportMd, reportModel, gameId],
   );
+}
+
+// ─────────────────────────── Turnuvalar ───────────────────────────
+
+import type { TournamentParticipant, TournamentRecord, ModelStat } from "../types";
+
+export async function createTournament(
+  name: string,
+  participants: TournamentParticipant[],
+  rounds: number,
+  moveCap: number,
+): Promise<number | null> {
+  if (!isTauri) return null;
+  const db = await getDb();
+  const res = await db.execute(
+    `INSERT INTO tournaments (name, participants, rounds, move_cap) VALUES ($1,$2,$3,$4)`,
+    [name, JSON.stringify(participants), rounds, moveCap],
+  );
+  return res.lastInsertId ?? null;
+}
+
+export async function setTournamentStatus(id: number, status: string): Promise<void> {
+  if (!isTauri || id == null) return;
+  const db = await getDb();
+  await db.execute(`UPDATE tournaments SET status=$1 WHERE id=$2`, [status, id]);
+}
+
+export async function listTournaments(): Promise<TournamentRecord[]> {
+  if (!isTauri) return [];
+  const db = await getDb();
+  return db.select<TournamentRecord[]>(`SELECT * FROM tournaments ORDER BY created_at DESC LIMIT 50`);
+}
+
+export async function getTournamentGames(tournamentId: number): Promise<GameSummary[]> {
+  if (!isTauri) return [];
+  const db = await getDb();
+  return db.select<GameSummary[]>(
+    `SELECT * FROM games WHERE tournament_id=$1 ORDER BY id ASC`,
+    [tournamentId],
+  );
+}
+
+/** Tüm maçlardan model başına istatistik (karşılaştırma paneli). */
+export async function modelStats(): Promise<ModelStat[]> {
+  if (!isTauri) return [];
+  const db = await getDb();
+  const rows = await db.select<GameSummary[]>(
+    `SELECT * FROM games WHERE result IN ('1-0','0-1','1/2-1/2') AND
+       (white_type='ai' OR black_type='ai')`,
+  );
+  const map = new Map<string, ModelStat>();
+  const accSum = new Map<string, { sum: number; n: number }>();
+  const get = (key: string, name: string): ModelStat => {
+    let s = map.get(key);
+    if (!s) {
+      s = { key, name, games: 0, wins: 0, draws: 0, losses: 0, winPct: 0, avgAccuracy: null, avgMoveMs: null };
+      map.set(key, s);
+    }
+    return s;
+  };
+  for (const g of rows) {
+    for (const side of ["white", "black"] as const) {
+      const type = g[`${side}_type`];
+      if (type !== "ai") continue;
+      const model = g[`${side}_model`];
+      const provider = g[`${side}_provider`];
+      if (!model) continue;
+      const key = `${provider ?? "?"}/${model}`;
+      const s = get(key, model);
+      s.games++;
+      const win = (side === "white" && g.result === "1-0") || (side === "black" && g.result === "0-1");
+      const loss = (side === "white" && g.result === "0-1") || (side === "black" && g.result === "1-0");
+      if (g.result === "1/2-1/2") s.draws++;
+      else if (win) s.wins++;
+      else if (loss) s.losses++;
+      const acc = side === "white" ? g.white_accuracy : g.black_accuracy;
+      if (acc != null) {
+        const a = accSum.get(key) ?? { sum: 0, n: 0 };
+        a.sum += acc; a.n++;
+        accSum.set(key, a);
+      }
+    }
+  }
+  const out = [...map.values()].map((s) => {
+    const a = accSum.get(s.key);
+    return {
+      ...s,
+      winPct: s.games ? Math.round(((s.wins + s.draws * 0.5) / s.games) * 1000) / 10 : 0,
+      avgAccuracy: a && a.n ? Math.round((a.sum / a.n) * 10) / 10 : null,
+    };
+  });
+  return out.sort((x, y) => y.winPct - x.winPct || y.games - x.games);
 }

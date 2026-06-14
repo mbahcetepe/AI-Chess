@@ -82,11 +82,20 @@ zamanında **Ayarlar → AI Sağlayıcıları**'ndan girer.
    gönderir, Ollama reddeder. **Çözüm:** istekleri Rust backend'inden (`http_proxy`,
    reqwest) gönder — Origin eklenmez, CORS tetiklenmez. Ollama + custom hep bu proxy'den.
 
-2. **Ollama "düşünme" modelleri (gemma vb.):** Uzun reasoning üretirler. `num_predict`
-   sınırı modeli düşünme aşamasında keser → `content` boş → fallback. enum `format` da
-   boş döndürebilir. **Çözüm:** istek gövdesine **`think: false`** ekle (hamle için);
-   num_predict sınırı koyma; `content` boşsa `thinking` alanını da oku. Gerçek
-   gemma4:12b testinde: 0 fallback, 15/16 ilk deneme, ~615ms/hamle.
+2. **Reasoning ("düşünme") modelleri tüm sağlayıcılarda token bütçesini yer → içerik boş → fallback:**
+   - **Ollama (gemma vb.):** istek gövdesine **`think: false`** ekle (hamle için); num_predict
+     sınırı koyma; `content` boşsa `thinking` alanını da oku. gemma4:12b: 0 fallback, ~615ms.
+     **Ama think:false zayıf oynatır** → "Ollama derin düşünme" ayarı (settingsStore.ollamaDeepThink)
+     açıkken think serbest (güçlü, ~20-30sn), kapalıyken hızlı. (`src/llm/providers/ollama.ts`)
+   - **OpenAI o-serisi (o1/o3):** `max_completion_tokens` 1024 reasoning'de tükeniyordu
+     (finish_reason=length, content boş). **Çözüm:** o-serisini tespit et → `max_completion_tokens`
+     16000 + **`reasoning_effort: "low"`**. CANLI test: eski=boş⚠ → yeni=Nxd4. (`openai.ts` isReasoning)
+   - **Gemini 2.5:** varsayılan düşünür → token yer. **Çözüm:** hamle için maxOutputTokens 8000 +
+     2.5-flash'ta `thinkingConfig:{thinkingBudget:0}`. Ayrıca modelleri CANLI listele
+     (`listGeminiModels`) — sabit liste `gemini-2.0-flash` retired olmuştu. (`gemini.ts`)
+   - **Claude:** thinking varsayılan KAPALI (param göndermezsen) → 1024 yeter; güvenlik için 2000 yaptım.
+   - **Enum/structured output** yasallığı garanti eder AMA reasoning modellerinde boş döndürür ve
+     modeli aptallaştırır → KULLANMA. Serbest düşünme + parser + retry + son çare rastgele fallback tercih edildi.
 
 3. **Enum/grammar-kısıtlı structured output yasallığı garanti eder AMA modeli
    aptallaştırır** (serbest düşünmeyi engeller). Kalite için serbest düşünme + parser +
@@ -114,6 +123,32 @@ zamanında **Ayarlar → AI Sağlayıcıları**'ndan girer.
 - Türkçe iletişim.
 
 ---
+
+## 📍 Güncel Durum / Devam (devir teslim)
+
+**Tamamlanan (v1.0–v1.6):** Tüm temel + 10/10 özellikler (bkz. CHANGELOG.md). Reasoning-model
+düzeltmeleri tüm sağlayıcılarda (yukarı, Öğrenilen #2). **Güvenlik:** #1 fs scope daraltıldı,
+#4 CSP eklendi, #5 SQL int, **#3 API anahtarları DPAPI ile şifreli DB'de** (uçtan uca doğrulandı).
+
+**Kalan güvenlik kalemleri (yapılacak):** #2 `http_proxy`'yi bilinen host'larla sınırla (SSRF),
+#6 exe kod imzalama (SmartScreen), #7 custom uç noktada https önerisi.
+
+**Faz 2 — DEVAM EDİYOR (bu oturumda yazıldı, in-app TEST EDİLMEDİ):**
+Model Turnuvası + Karşılaştırma Paneli. Kararlar: çift devreli (seçilebilir), otomatik analiz YOK,
+200 ply sınırı (→ berabere). Dosyalar: `types.ts` (Tournament*/ModelStat/TournamentParticipant +
+termination 'move_cap'), `migrations/004_tournaments.sql` (tournaments tablosu + games.tournament_id),
+`db/gamesRepo.ts` (createTournament, setTournamentStatus, listTournaments, getTournamentGames,
+modelStats, createGame'e tournamentId param), `engine/gameRunner.ts` (playHeadlessGame — iki AI'yı
+tahta olmadan oynatır), `store/tournamentStore.ts` (orkestrasyon: schedule/standings/pause/stop/live),
+`pages/TournamentPage.tsx` (kurulum + canlı board + puan tablosu + çapraz tablo + Karşılaştırma sekmesi),
+`App.tsx` (nav + /tournament route). **TEST için en hızlısı:** sadece Stockfish profilleriyle turnuva
+(API gerekmez, hızlı biter). Katılımcılar = seçilen profiller.
+
+**Faz 2 sıradaki (ROADMAP.md ilk dalga):** Otomatik maç-sonu analizi + Parlak hamle tespiti,
+PGN içe aktarma + İstatistik panosu, Otomatik güncelleme.
+
+**Lisans:** GPL-3.0 (Stockfish gömülü). LICENSE + THIRD-PARTY-NOTICES.md var. Kapalı kaynak istenirse
+Stockfish'i gömme, kullanıcı ayrı UCI motoru kursun.
 
 ## 🧪 Ollama'yı gerçek modele karşı test etme
 
