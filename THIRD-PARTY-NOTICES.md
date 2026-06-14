@@ -1,55 +1,54 @@
-# Üçüncü Taraf Lisans Bildirimleri
+# Third-Party License Notices
 
-AI Chess aşağıdaki açık kaynak bileşenleri kullanır. Her birinin lisans koşulları geçerlidir.
+AI Chess uses the open-source components below. The license terms of each apply.
 
 ---
 
 ## ⚠️ Stockfish — GPL-3.0 (copyleft)
 
-Bu uygulama, satranç motoru olarak **Stockfish 18**'i (gömülü WASM,
-`public/engine/stockfish-18-lite-single.*`) kullanır.
+This application uses **Stockfish 18** as its chess engine (embedded WASM,
+`public/engine/stockfish-18-lite-single.*`).
 
-- **Lisans:** GNU General Public License v3.0 (GPL-3.0-or-later)
-- **Telif:** The Stockfish developers (bkz. AUTHORS — https://github.com/official-stockfish/Stockfish)
-- **Kaynak:** https://github.com/official-stockfish/Stockfish
+- **License:** GNU General Public License v3.0 (GPL-3.0-or-later)
+- **Copyright:** The Stockfish developers (see AUTHORS — https://github.com/official-stockfish/Stockfish)
+- **Source:** https://github.com/official-stockfish/Stockfish
 
-**ÖNEMLİ — copyleft etkisi:** Stockfish GPL-3.0 ile lisanslıdır. Stockfish'i içeren bu
-uygulamayı **dağıtırsanız**, dağıttığınız **birleşik eserin tamamı GPL-3.0 koşullarına
-tabidir**: alıcılara **tam kaynak kodunu** sağlamanız, GPL-3.0 lisans metnini ve telif
-bildirimlerini eklemeniz gerekir. GPL **ticari kullanıma/satışa izin verir** ancak
-**kapalı kaynak (proprietary) yapmaya izin vermez.**
+**IMPORTANT — copyleft effect:** Stockfish is licensed under GPL-3.0. If you **distribute**
+this application, which embeds Stockfish, the **entire combined work is subject to GPL-3.0**:
+you must provide recipients with the **complete source code** and include the GPL-3.0 license
+text and copyright notices. The GPL **permits commercial use and sale** but **does not permit
+making the work closed-source (proprietary).**
 
-Proprietary/kapalı bir ürün hedefleniyorsa Stockfish gömülmemeli; kullanıcı tarafından
-ayrıca kurulan bir UCI motoruyla ayrı süreç üzerinden konuşulmalıdır (hukuki kesinlik
-için danışmanlık önerilir).
+If a proprietary/closed product is intended, Stockfish must not be embedded; instead, talk to a
+separately user-installed UCI engine over a separate process (consult a lawyer for legal certainty).
 
-GPL-3.0 tam metni: https://www.gnu.org/licenses/gpl-3.0.txt
+Full GPL-3.0 text: https://www.gnu.org/licenses/gpl-3.0.txt
 
 ---
 
-## İzin Veren Lisanslı Bileşenler (MIT / BSD / Apache-2.0)
+## Permissively Licensed Components (MIT / BSD / Apache-2.0)
 
-| Bileşen | Lisans | Amaç |
+| Component | License | Purpose |
 |---|---|---|
-| Tauri | MIT / Apache-2.0 | Masaüstü kabuk |
-| React, React DOM | MIT | Arayüz |
-| react-router-dom | MIT | Yönlendirme |
-| react-chessboard | MIT | Satranç tahtası |
-| react-markdown | MIT | Rapor görüntüleme |
-| zustand | MIT | Durum yönetimi |
-| chess.js | BSD-2-Clause | Satranç kuralları, PGN/FEN |
+| Tauri | MIT / Apache-2.0 | Desktop shell |
+| React, React DOM | MIT | UI |
+| react-router-dom | MIT | Routing |
+| react-chessboard | MIT | Chessboard |
+| react-markdown | MIT | Report rendering |
+| zustand | MIT | State management |
+| chess.js | BSD-2-Clause | Chess rules, PGN/FEN |
 | @anthropic-ai/sdk | MIT | Claude API |
-| openai | Apache-2.0 | OpenAI / OpenAI-uyumlu API |
+| openai | Apache-2.0 | OpenAI / OpenAI-compatible API |
 | @google/genai | Apache-2.0 | Gemini API |
-| @tauri-apps/plugin-* | MIT / Apache-2.0 | SQL, HTTP, Store, Dialog, FS |
+| @tauri-apps/plugin-* | MIT / Apache-2.0 | SQL, HTTP, Store, Dialog, FS, Updater, Process |
 | reqwest (Rust) | MIT / Apache-2.0 | Backend HTTP proxy |
 
-Bu bileşenler atıf (copyright + lisans bildirimi) korunarak ticari ve kapalı ürünlerde
-serbestçe kullanılabilir.
+These components may be used freely in commercial and closed products as long as attribution
+(copyright + license notice) is preserved.
 
 ---
 
-## Stockfish Lisansının Tam Metni
+## Full Text of the Stockfish License
 
-`node_modules/stockfish/Copying.txt` dosyasında bulunur (GNU GPL v3, 29 June 2007).
-Dağıtımda bu metin dahil edilmelidir.
+Found in `node_modules/stockfish/Copying.txt` (GNU GPL v3, 29 June 2007). This text must be
+included with any distribution.
